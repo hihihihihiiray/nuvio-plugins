@@ -579,20 +579,21 @@ function getStreams(tmdbId, type, season, episode) {
           if (sourceResult && sourceResult.url) {
             console.log(`[4KHDHub] Extracting from: ${sourceResult.url}`);
             const extractedLinks = yield extractHubCloud(sourceResult.url, sourceResult.meta);
-            return extractedLinks.map((link) => ({
-              const quality = sourceResult.meta.height ? sourceResult.meta.height + "p" : "Unknown";
-              const size = formatBytes(link.meta.bytes || 0);
-            
-              name: `4KHDHub - ${link.source}${sourceResult.meta.height ? ` ${sourceResult.meta.height}p` : ""}`,
-              title: link.meta.title,
-              url: link.url,
-              quality: sourceResult.meta.height ? `${sourceResult.meta.height}p` : void 0,
-              size: size || undefined,
-              behaviorHints: {
-                bingeGroup: `4khdhub-${link.source}`
-              }
-            }));
-          }
+            return extractedLinks.map((link) => {
+  const quality = sourceResult.meta.height ? sourceResult.meta.height + "p" : "Unknown";
+  const size = formatBytes(link.meta.bytes || 0);
+
+  return {
+    name: `4KHDHub - ${link.source}${sourceResult.meta.height ? ` ${sourceResult.meta.height}p` : ""}`,
+    title: link.meta.title,
+    url: link.url,
+    quality: sourceResult.meta.height ? `${sourceResult.meta.height}p` : void 0,
+    size: size || undefined,
+    behaviorHints: {
+      bingeGroup: `4khdhub-${link.source}`
+    }
+  };
+});
           return [];
         } catch (err) {
           console.log(`[4KHDHub] Item processing error: ${err.message}`);
