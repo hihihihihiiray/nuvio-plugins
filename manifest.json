@@ -122,7 +122,7 @@
     {
       "id": "nuvio-movix",
       "name": "Movix",
-      "description": "Movies and TV series in English & French (dubbed/subtitled) (~5s)",
+      "description": "Movies and TV series in English & subtitled or dubbed French (~5s)",
       "version": "1.0",
       "author": "wooodyhood",
       "supportedTypes": ["movie", "tv"],
@@ -199,7 +199,7 @@
     {
       "id": "nuvio-kisskh",
       "name": "KissKH",
-      "description": "Stream Korean dramas and movies from onlykdrama.top (~6s)",
+      "description": "Stream Korean dramas and movies from kisskh.ovh (~6s)",
       "version": "1.0",
       "author": "Michat88",
       "supportedTypes": ["movie", "tv"],
