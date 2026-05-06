@@ -44,7 +44,7 @@
     {
       "id": "nuvio-dahmermovies",
       "name": "DahmerMovies",
-      "description": "DahmerMovies streaming service. Is very slow to fetch and stream, only use if needed. (~18s)",
+      "description": "DahmerMovies streaming service. Provides high-quality links for movies & shows (~5s)",
       "version": "1.4",
       "author": "Nuvio Team",
       "supportedTypes": ["movie", "tv"],
