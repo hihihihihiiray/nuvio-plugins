@@ -73,9 +73,9 @@ function getQualityWithCodecs(str) {
     if (lowerStr.includes('bluray')) codecs.push('BluRay');
 
     // Audio codecs
-    if (lowerText.includes('atmos')) codecs.push('Atmos');
-    if (lowerText.includes('truehd') || lowerText.includes('true-hd')) codecs.push('TrueHD');
-    if (lowerText.includes('dts-hd ma') || lowerText.includes('dtshdma') || lowerText.includes('dts-hdhr')) codecs.push('DTS-HD MA');
+    if (lowerStr.includes('atmos')) codecs.push('Atmos');
+    if (lowerStr.includes('truehd') || lowerStr.includes('true-hd')) codecs.push('TrueHD');
+    if (lowerStr.includes('dts-hd ma') || lowerStr.includes('dtshdma') || lowerStr.includes('dts-hdhr')) codecs.push('DTS-HD MA');
 
     if (codecs.length > 0) {
         return `${baseQuality} | ${codecs.join(' | ')}`;
