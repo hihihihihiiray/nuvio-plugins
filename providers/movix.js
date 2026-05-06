@@ -51,7 +51,7 @@ function resolveRedirect(url, referer) {
     method: 'GET',
     redirect: 'follow',
     headers: {
-      'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 15_7_5) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.3 Safari/605.1.15',
+      'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 15_7_5) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.0 Safari/605.1.15',
       'Referer': referer
     }
   }).then(function(res) { return res.url || url; })
@@ -63,7 +63,7 @@ function resolveEmbed(embedUrl, referer) {
     method: 'GET',
     redirect: 'follow',
     headers: {
-      'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 15_7_5) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.3 Safari/605.1.15',
+      'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 15_7_5) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.0 Safari/605.1.15',
       'Referer': referer
     }
   })
@@ -97,7 +97,7 @@ function fetchPurstream(apiBase, referer, tmdbId, mediaType, season, episode) {
   console.log('[Movix] Purstream: ' + url);
   return fetch(url, {
     method: 'GET',
-    headers: { 'Referer': referer, 'Origin': referer.replace(/\/$/, ''), 'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 15_7_5) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.3 Safari/605.1.15' }
+    headers: { 'Referer': referer, 'Origin': referer.replace(/\/$/, ''), 'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 15_7_5) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.0 Safari/605.1.15' }
   })
     .then(function(res) { if (!res.ok) throw new Error('HTTP ' + res.status); return res.json(); })
     .then(function(data) {
@@ -115,7 +115,7 @@ function fetchCpasmal(apiBase, referer, tmdbId, mediaType, season, episode) {
   console.log('[Movix] Cpasmal: ' + url);
   return fetch(url, {
     method: 'GET',
-    headers: { 'Referer': referer, 'Origin': referer.replace(/\/$/, ''), 'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 15_7_5) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.3 Safari/605.1.15' }
+    headers: { 'Referer': referer, 'Origin': referer.replace(/\/$/, ''), 'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 15_7_5) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.0 Safari/605.1.15' }
   })
     .then(function(res) { if (!res.ok) throw new Error('HTTP ' + res.status); return res.json(); })
     .then(function(data) {
@@ -143,7 +143,7 @@ function fetchFstream(apiBase, referer, tmdbId, mediaType, season, episode) {
   console.log('[Movix] FStream: ' + url);
   return fetch(url, {
     method: 'GET',
-    headers: { 'Referer': referer, 'Origin': referer.replace(/\/$/, ''), 'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 15_7_5) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.3 Safari/605.1.15' }
+    headers: { 'Referer': referer, 'Origin': referer.replace(/\/$/, ''), 'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 15_7_5) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.0 Safari/605.1.15' }
   })
     .then(function(res) { if (!res.ok) throw new Error('HTTP ' + res.status); return res.json(); })
     .then(function(data) {
@@ -169,7 +169,7 @@ function fetchDarkino(apiBase, referer, tmdbId, mediaType, season, episode) {
   var headers = {
     'Referer': referer,
     'Origin': referer.replace(/\/$/, ''),
-    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 15_7_5) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.3 Safari/605.1.15'
+    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 15_7_5) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.0 Safari/605.1.15'
   };
   var tmdbType = mediaType === 'tv' ? 'tv' : 'movie';
 
@@ -213,7 +213,7 @@ function fetchDarkino(apiBase, referer, tmdbId, mediaType, season, episode) {
                     quality: s.quality || 'HD',
                     format: 'm3u8',
                     headers: {
-                      'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 15_7_5) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.3 Safari/605.1.15',
+                      'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 15_7_5) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.0 Safari/605.1.15',
                       'Referer': 'https://darkibox.com/'
                     }
                   };
@@ -242,7 +242,7 @@ function processEmbedSources(sources, referer) {
         url: directUrl,
         quality: 'HD',
         format: directUrl.match(/\.mp4/i) ? 'mp4' : 'm3u8',
-        headers: { 'Referer': referer, 'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 15_7_5) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.3 Safari/605.1.15' }
+        headers: { 'Referer': referer, 'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 15_7_5) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.0 Safari/605.1.15' }
       };
     });
   })).then(function(results) {
@@ -261,7 +261,7 @@ function tryFetchAll(apiBase, referer, tmdbId, mediaType, season, episode) {
             url: resolvedUrl,
             quality: source.name && source.name.indexOf('1080') !== -1 ? '1080p' : '720p',
             format: source.format || 'm3u8',
-            headers: { 'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 15_7_5) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.3 Safari/605.1.15' }
+            headers: { 'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 15_7_5) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.0 Safari/605.1.15' }
           };
         });
       }));

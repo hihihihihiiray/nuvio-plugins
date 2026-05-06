@@ -45,7 +45,7 @@ var __async = (__this, __arguments, generator) => {
 // src/4khdhub/constants.js
 var BASE_URL = "https://4khdhub.click";
 var TMDB_API_KEY = "1c29a5198ee1854bd5eb45dbe8d17d92";
-var USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 15_7_5) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.3 Safari/605.1.15";
+var USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 15_7_5) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.0 Safari/605.1.15";
 var DOMAINS_URL = "https://raw.githubusercontent.com/phisher98/TVVVV/refs/heads/main/domains.json";
 
 // src/4khdhub/utils.js

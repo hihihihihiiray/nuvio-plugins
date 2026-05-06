@@ -56,7 +56,7 @@ const DOMAIN_CACHE_TTL = 60 * 60 * 1000;
 function makeRequest(url, options = {}) {
   return __async(this, null, function* () {
     const defaultHeaders = {
-      "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 15_7_5) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.3 Safari/605.1.15",
+      "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 15_7_5) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.0 Safari/605.1.15",
       "Accept": "application/json",
     };
     const opts = __spreadProps(__spreadValues({}, options), {
@@ -114,7 +114,7 @@ function searchMoviesDrive(query) {
       "Sec-Fetch-Dest": "empty",
       "Sec-Fetch-Mode": "cors",
       "Sec-Fetch-Site": "same-origin",
-      "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 15_7_5) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.3 Safari/605.1.15"
+      "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 15_7_5) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.0 Safari/605.1.15"
     };
 
     try {
@@ -184,7 +184,7 @@ function getStreams(tmdbId, mediaType, seasonNum, episodeNum) {
         type: "direct",
         quality: link.quality ? `${link.quality}p` : "Unknown",
         headers: {
-          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+          "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 15_7_5) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.0 Safari/605.1.15",
           "Referer": "", // we don't have pageUrl for series, but it's fine
         },
       }));
