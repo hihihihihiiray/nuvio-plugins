@@ -227,7 +227,6 @@ async function invokeDahmerMovies(title, year, season = null, episode = null) {
     console.log(`[DahmerMovies] Searching for: ${title} (${year})${season ? ` Season ${season}` : ''}${episode ? ` Episode ${episode}` : ''}`);
 
     const titleVariations = [
-        title.replace(/:/g, '') + ' (' + year + ')',
         title.replace(/:/g, '')
     ];
 
@@ -238,7 +237,7 @@ async function invokeDahmerMovies(title, year, season = null, episode = null) {
         const safeVariant = variant.replace(/ /g, '%20').replace(/\(/g, '%28').replace(/\)/g, '%29');
         const tryUrl = season === null
             ? `${DAHMER_MOVIES_API}/movies/${safeVariant}/`
-            : `${DAHMER_MOVIES_API}/tvs/${safeVariant}/${season < 10 ? 'Season%200' + season : 'Season%20' + season}/`;
+            : `${DAHMER_MOVIES_API}/tvs/${safeVariant}/${season : 'Season%20' + season}/`;
 
         try {
             const res = await makeRequest(tryUrl);
