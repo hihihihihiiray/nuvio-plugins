@@ -6,7 +6,7 @@ console.log('[DahmerMovies] Initializing Dahmer Movies scraper');
 // Constants
 const TMDB_API_KEY = "1c29a5198ee1854bd5eb45dbe8d17d92";
 const DAHMER_MOVIES_API = 'https://a.111477.xyz';
-const TIMEOUT = 22000; // 22 seconds
+const TIMEOUT = 20000; // 20 seconds
 
 // Quality mapping
 const Qualities = {
@@ -69,7 +69,7 @@ function getQualityWithCodecs(str) {
     if (lowerStr.includes('remux')) codecs.push('REMUX');
     if (lowerStr.includes('imax')) codecs.push('IMAX');
     if (lowerStr.includes('web-dl')) codecs.push('WEB-DL');
-    if (lowerStr.includes('bluray') || lowerStr.includes('BLURAY')) codecs.push('BluRay');
+    if (lowerStr.includes('bluray')) codecs.push('BluRay');
 
     if (codecs.length > 0) {
         return `${baseQuality} | ${codecs.join(' | ')}`;
@@ -227,10 +227,8 @@ async function invokeDahmerMovies(title, year, season = null, episode = null) {
     console.log(`[DahmerMovies] Searching for: ${title} (${year})${season ? ` Season ${season}` : ''}${episode ? ` Episode ${episode}` : ''}`);
 
     const titleVariations = [
-        title.replace(/:/g, ' -'), // Variation for shows that contain a ":"
         title.replace(/:/g, '') + ' (' + year + ')',
-        title.replace(/:/g, ''),
-        title
+        title.replace(/:/g, '')
     ];
 
     let html = null;
@@ -238,35 +236,19 @@ async function invokeDahmerMovies(title, year, season = null, episode = null) {
 
     for (const variant of titleVariations) {
         const safeVariant = variant.replace(/ /g, '%20').replace(/\(/g, '%28').replace(/\)/g, '%29');
-        
-        if (season === null) {
-            const tryUrl = `${DAHMER_MOVIES_API}/movies/${safeVariant}/`;
-            try {
-                const res = await makeRequest(tryUrl);
-                const text = await res.text();
-                if (text && text.includes('<a')) {
-                    html = text;
-                    encodedUrl = tryUrl;
-                    break;
-                }
-            } catch (e) { continue; }
-        } else {
-            // Updated to try both "Season 5" and "Season 05" formats
-            const seasonOptions = [`Season%20${season}`, `Season%20${season < 10 ? '0' + season : season}`];
-            for (const sFolder of seasonOptions) {
-                const tryUrl = `${DAHMER_MOVIES_API}/tvs/${safeVariant}/${sFolder}/`;
-                try {
-                    const res = await makeRequest(tryUrl);
-                    const text = await res.text();
-                    if (text && text.includes('<a')) {
-                        html = text;
-                        encodedUrl = tryUrl;
-                        break;
-                    }
-                } catch (e) { continue; }
+        const tryUrl = season === null
+            ? `${DAHMER_MOVIES_API}/movies/${safeVariant}/`
+            : `${DAHMER_MOVIES_API}/tvs/${safeVariant}/${season < 10 ? 'Season%200' + season : 'Season%20' + season}/`;
+
+        try {
+            const res = await makeRequest(tryUrl);
+            const text = await res.text();
+            if (text && text.includes('<a')) {
+                html = text;
+                encodedUrl = tryUrl;
+                break;
             }
-            if (html) break;
-        }
+        } catch (e) { continue; }
     }
 
     if (!html) return [];
