@@ -6,6 +6,7 @@ console.log('[DahmerMovies] Initializing Dahmer Movies scraper');
 // Constants
 const TMDB_API_KEY = "1c29a5198ee1854bd5eb45dbe8d17d92";
 const DAHMER_MOVIES_API = 'https://a.111477.xyz';
+const DAHMER_WORKER_API = 'https://p.111477.xyz/bulk?u=';
 const TIMEOUT = 20000; // 20 seconds
 
 // Quality mapping
@@ -194,7 +195,7 @@ function resolvePath(path, encodedUrl) {
         .replace(/\)/g, '%29');
 
     // Attach bulk proxy prefix
-    const proxiedUrl = `https://p.111477.xyz/bulk?u=${fullUrl}`;
+    const proxiedUrl = `DAHMER_WORKER_API${fullUrl}`;
 
     // Calculate raw bytes for sorting
     const sizeBytes = (function(s) {
