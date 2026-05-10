@@ -17,7 +17,6 @@ A curated collection of the best high-quality scrapers compiled for the Nuvio st
 | Provider | Language | Content | Quality
 | --- | --- | --- | --- |
 | [![4khdhub.png](https://i.postimg.cc/Z5B7RF79/4khdhub.png)](https://postimg.cc/21YF9vfm) 4KHDHub | 🏴󠁧󠁢󠁥󠁮󠁧󠁿 🇮🇳 | Shows & Movies | 4K / 1080p / 720p
-| [![animekai.png](https://i.postimg.cc/cLCqcnFV/animekai.png)](https://postimg.cc/9r6Nmr5p) AnimeKai | 🏴󠁧󠁢󠁥󠁮󠁧󠁿 🇯🇵 | Anime (Shows & Movies) | 1080p / 720p
 | [![dfb4smC5](https://ruayamo.s-ul.eu/dfb4smC5)](https://postimg.cc/QBbHSrdv) AnimePahe | 🏴󠁧󠁢󠁥󠁮󠁧󠁿 🇯🇵 | Anime (Shows & Movies) | 1080p / 720p
 | [![56ivks.png](https://files.catbox.moe/56ivks.png)](https://postimg.cc/svGK7JPb) DahmerMovies | 🏴󠁧󠁢󠁥󠁮󠁧󠁿 | Shows & Movies | 4K / 1080p
 | [![TAdfgLqZ](https://ruayamo.s-ul.eu/TAdfgLqZ)](https://postimg.cc/0K07M6fk) Embed69 | 🏴󠁧󠁢󠁥󠁮󠁧󠁿 🇪🇸 | Shows & Movies | 1080p / 720p
@@ -36,7 +35,7 @@ A curated collection of the best high-quality scrapers compiled for the Nuvio st
 | 🎬 VidLink | 🏴󠁧󠁢󠁥󠁮󠁧󠁿 | Shows & Movies | 1080p / 720p
 
 
-**Total Number of Plugins**: **18**
+**Total Number of Plugins**: **17**
 
 ## Disclaimer
 **No content is hosted by this repository.**
