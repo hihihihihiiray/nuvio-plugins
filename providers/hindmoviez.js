@@ -20,7 +20,7 @@ const PLUGIN_TAG   = '[HindMoviez]';
 //   • Edge cache at Cloudflare PoP  → faster on repeated requests
 //   • Correct Referer headers forwarded to CDN
 //   • HubCloud / FSL redirect chain resolved transparently
-const HM_WORKER = 'https://hindmoviez.s4nch1tt.workers.dev';
+const HM_WORKER = 'https://pvt.s4nch1tt.workers.dev';
 
 function hmProxyUrl(rawUrl) {
   if (!rawUrl) return rawUrl;
