@@ -29,7 +29,8 @@ A curated collection of the best high-quality plugins compiled for the Nuvio str
 | [![moviesdrive.png](https://i.postimg.cc/PrKhFqtK/moviesdrive.png)](https://postimg.cc/56HZXbQF) MoviesDrive | 🏴󠁧󠁢󠁥󠁮󠁧󠁿 | Shows & Movies | 4K / 1080p / 720p
 | [![0lxldV5e](https://ruayamo.s-ul.eu/0lxldV5e)](https://postimg.cc/p5JKh9ZV) Movix | 🏴󠁧󠁢󠁥󠁮󠁧󠁿 🇫🇷 | Shows & Movies | 1080p / 720p
 | [![showbox.png](https://i.postimg.cc/nzzVyqYQ/showbox.png)](https://postimg.cc/67kNR2P9) ShowBox | 🏴󠁧󠁢󠁥󠁮󠁧󠁿 | Shows & Movies | 4K / 1080p / 720p
-| [![uhdmovies.png](https://i.postimg.cc/VkCg1svN/uhdmovies.png)](https://postimg.cc/3k3mFTgM) UHDMovies | 🏴󠁧󠁢󠁥󠁮󠁧󠁿 🇮🇳 | Shows & Movies | 4K / 1080p / 720p
+| [![uhdmovies.png](https://i.postimg.cc/VkCg1svN/uhdmovies.png)](https://postimg.cc/qh71J3gx) UHDMovies | 🏴󠁧󠁢󠁥󠁮󠁧󠁿 🇮🇳 | Shows & Movies | 4K / 1080p / 720p
+| [![s8LJTz4T](https://ruayamo.s-ul.eu/s8LJTz4T)](https://postimg.cc/3k3mFTgM) VegaMovies | 🏴󠁧󠁢󠁥󠁮󠁧󠁿 🇮🇳 | Shows & Movies | 4K / 1080p / 720p
 | [![0MHxk3jE](https://ruayamo.s-ul.eu/0MHxk3jE)](https://postimg.cc/DJNNcCd9) VidEasy | 🏴󠁧󠁢󠁥󠁮󠁧󠁿 🇩🇪 🇮🇹 🇫🇷 🇪🇸 🇧🇷 | Shows & Movies | 4K / 1080p / 720p
 | [![x6exNRUb](https://ruayamo.s-ul.eu/x6exNRUb)](https://postimg.cc/754Dch6T) VidFast | 🏴󠁧󠁢󠁥󠁮󠁧󠁿 | Shows & Movies | 1080p / 720p
 | 🎬 VidLink | 🏴󠁧󠁢󠁥󠁮󠁧󠁿 | Shows & Movies | 1080p / 720p
