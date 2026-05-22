@@ -9,7 +9,7 @@ const cheerio = require('cheerio-without-node-native');
 // Configuration
 // ─────────────────────────────────────────────────────────────────────────────
 
-const BASE_URL     = 'https://hindmovie.ltd';
+const BASE_URL     = 'https://hindmovie.icu';
 const TMDB_API_KEY = '1c29a5198ee1854bd5eb45dbe8d17d92';
 const PLUGIN_TAG   = '[HindMoviez]';
 
