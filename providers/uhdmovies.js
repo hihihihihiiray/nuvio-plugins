@@ -273,48 +273,35 @@ function extractVideoSeed(finallink) {
 function extractInstantLink(finallink) {
   console.log("[UHDMovies] Extracting InstantLink: " + finallink);
 
-  try {
-    var urlObj = new URL(finallink);
-    var host = urlObj.host;
-    if (!host) {
-      host = finallink.includes("video-leech") ? "video-leech.pro" : "video-seed.pro";
-    }
-
-    var token = finallink.split("url=")[1];
-    if (!token) return Promise.resolve(null);
-
-    return fetch("https://" + host + "/api", {
-      method: "POST",
-      headers: {
-        "User-Agent": USER_AGENT,
-        "Content-Type": "application/x-www-form-urlencoded",
-        "x-token": host,
-        "Referer": finallink
-      },
-      body: "keys=" + encodeURIComponent(token)
+  return fetch(finallink, {
+    headers: { "User-Agent": USER_AGENT },
+    redirect: "follow"
+  })
+    .then(function (res) {
+      if (res.url && res.url.includes("url=")) {
+        return res.url.split("url=")[1];
+      }
+      return null;
     })
-      .then(function (res) { return res.text(); })
-      .then(function (text) {
-        var urlMatch = text.match(/url":"([^"]+)"/);
-        if (urlMatch) {
-          return urlMatch[1].replace(/\\\//g, "/");
-        }
-        return null;
-      })
-      .catch(function (error) {
-        console.error("[UHDMovies] InstantLink extraction failed:", error.message);
-        return null;
-      });
-  } catch (e) {
-    return Promise.resolve(null);
-  }
+    .catch(function (error) {
+      console.error("[UHDMovies] InstantLink extraction failed:", error.message);
+      return null;
+    });
 }
 
 function extractResumeBot(url) {
   console.log("[UHDMovies] Extracting ResumeBot: " + url);
 
+  var ssid = "";
   return fetch(url, { headers: { "User-Agent": USER_AGENT } })
-    .then(function (res) { return res.text(); })
+    .then(function (res) {
+      var setCookie = res.headers.get("set-cookie");
+      if (setCookie) {
+        var match = setCookie.match(/PHPSESSID=([^;]+)/);
+        if (match) ssid = match[1];
+      }
+      return res.text();
+    })
     .then(function (html) {
       var tokenMatch = html.match(/formData\.append\('token', '([a-f0-9]+)'\)/);
       var pathMatch = html.match(/fetch\('\/download\?id=([a-zA-Z0-9\/+]+)'/);
@@ -324,15 +311,22 @@ function extractResumeBot(url) {
       var path = pathMatch[1];
       var baseUrl = url.split("/download")[0];
 
+      var headers = {
+        "User-Agent": USER_AGENT,
+        "Content-Type": "application/x-www-form-urlencoded",
+        "Accept": "*/*",
+        "Origin": baseUrl,
+        "Referer": url,
+        "Sec-Fetch-Site": "same-origin"
+      };
+
+      if (ssid) {
+        headers["Cookie"] = "PHPSESSID=" + ssid;
+      }
+
       return fetch(baseUrl + "/download?id=" + path, {
         method: "POST",
-        headers: {
-          "User-Agent": USER_AGENT,
-          "Content-Type": "application/x-www-form-urlencoded",
-          "Accept": "*/*",
-          "Origin": baseUrl,
-          "Referer": url
-        },
+        headers: headers,
         body: "token=" + encodeURIComponent(token)
       });
     })
@@ -507,22 +501,6 @@ function extractDriveseedPage(url) {
       });
 
       return Promise.all(promises).then(function () {
-        // Sort by quality (highest first)
-        var qualityOrder = {
-          '2160p': 5,
-          '1440p': 4,
-          '1080p': 3,
-          '720p': 2,
-          '480p': 1,
-          '360p': 0,
-          '240p': -1,
-          'Unknown': -2
-        };
-        
-        streams.sort(function (a, b) {
-          return (qualityOrder[b.quality] || -2) - (qualityOrder[a.quality] || -2);
-        });
-        
         return streams;
       });
     })
@@ -581,52 +559,54 @@ function getTvEpisodeLink(pageUrl, targetSeason, targetEpisode) {
     .then(function (res) { return res.text(); })
     .then(function (html) {
       var $ = cheerio.load(html);
-      var links = [];
-
-      // From Kotlin: p:has(a:contains(Episode)) or div:has(a:contains(Episode))
-      var pTags = $("p:has(a:contains(Episode))");
-      if (pTags.length === 0) {
-        pTags = $("div:has(a:contains(Episode))");
-      }
-
+      var episodesMap = {};
       var currentSeason = 1;
-      pTags.each(function (_, pTag) {
-        var $pTag = $(pTag);
-        var prevPtag = $pTag.prev();
-        var details = prevPtag.text() || "";
 
-        // Extract season from previous element
-        var seasonMatch = details.match(/(?:Season |S0?)(\d+)/i);
+      $("pre, p, a").each(function (_, el) {
+        var $el = $(el);
+        var text = $el.text().trim();
+
+        // Check if this element defines a season
+        var seasonMatch = text.match(/(?:season\s*|S)(\d+)/i);
         if (seasonMatch) {
-          currentSeason = parseInt(seasonMatch[1]);
+          var parsedSeason = parseInt(seasonMatch[1]);
+          if (!isNaN(parsedSeason)) {
+            currentSeason = parsedSeason;
+          }
         }
 
-        // Check if this is the season we want
-        if (currentSeason === targetSeason) {
-          var aTags = $pTag.find("a:contains(Episode)");
-          aTags.each(function (idx, aTag) {
-            var episodeNum = idx + 1;
-            if (episodeNum === targetEpisode) {
-              var link = $(aTag).attr("href");
-              if (link) {
-                // Extract quality and size from details
-                var qualityMatch = details.match(/(1080p|720p|480p|2160p|4K|\d+0p)/i);
-                var sizeMatch = details.match(/(\d+(?:\.\d+)?\s*(?:MB|GB))/i);
+        // Check if this is an episode link
+        if ($el.is("a") && text.toLowerCase().includes("episode")) {
+          if (text.toLowerCase().includes("zip")) return;
 
-                links.push({
-                  sourceLink: link,
-                  quality: qualityMatch ? qualityMatch[1] : "Unknown",
-                  size: sizeMatch ? sizeMatch[1] : null,
-                  details: details
-                });
-              }
-            }
-          });
+          var epMatch = text.match(/Episode\s*(\d+)/i);
+          if (!epMatch) return;
+          var realEp = parseInt(epMatch[1]);
+          if (isNaN(realEp)) return;
+
+          var epUrl = $el.attr("href");
+          if (!epUrl) return;
+
+          var key = currentSeason + "-" + realEp;
+          if (!episodesMap[key]) {
+            episodesMap[key] = [];
+          }
+          episodesMap[key].push(epUrl);
         }
-        currentSeason++;
       });
 
-      console.log("[UHDMovies] Found " + links.length + " episode links for S" + targetSeason + "E" + targetEpisode);
+      var targetKey = targetSeason + "-" + targetEpisode;
+      var urls = episodesMap[targetKey] || [];
+      console.log("[UHDMovies] Found " + urls.length + " episode links for S" + targetSeason + "E" + targetEpisode + " (keys: " + Object.keys(episodesMap).join(", ") + ")");
+
+      var links = urls.map(function (url) {
+        return {
+          sourceLink: url,
+          quality: "Unknown",
+          size: null
+        };
+      });
+
       return links;
     })
     .catch(function (error) {
