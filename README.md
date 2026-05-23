@@ -18,6 +18,7 @@ A curated collection of the best high-quality plugins compiled for the Nuvio str
 | --- | --- | --- | --- |
 | [![4khdhub.png](https://i.postimg.cc/Z5B7RF79/4khdhub.png)](https://postimg.cc/21YF9vfm) 4KHDHub | 🏴󠁧󠁢󠁥󠁮󠁧󠁿 🇮🇳 | Shows & Movies | 4K / 1080p / 720p
 | [![dfb4smC5](https://ruayamo.s-ul.eu/dfb4smC5)](https://postimg.cc/QBbHSrdv) AnimePahe | 🏴󠁧󠁢󠁥󠁮󠁧󠁿 🇯🇵 | Anime (Shows & Movies) | 1080p / 720p
+| [![bdgAJi9w](https://ruayamo.s-ul.eu/bdgAJi9w)](https://postimg.cc/bD8wRQQ1) BollyFlix | 🏴󠁧󠁢󠁥󠁮󠁧󠁿  🇮🇳 🇯🇵 🇲🇾 🇰🇷 | Shows & Movies & Anime | 4K / 1080p / 720p
 | [![56ivks.png](https://files.catbox.moe/56ivks.png)](https://postimg.cc/svGK7JPb) DahmerMovies | 🏴󠁧󠁢󠁥󠁮󠁧󠁿 | Shows & Movies | 4K / 1080p
 | [![TAdfgLqZ](https://ruayamo.s-ul.eu/TAdfgLqZ)](https://postimg.cc/0K07M6fk) Embed69 | 🏴󠁧󠁢󠁥󠁮󠁧󠁿 🇪🇸 | Shows & Movies | 1080p / 720p
 | [![FASbMFZz](https://ruayamo.s-ul.eu/FASbMFZz)](https://postimg.cc/sGdR052X) FaselHD | 🏴󠁧󠁢󠁥󠁮󠁧󠁿 🇦🇪 | Shows & Movies | 1080p / 720p
@@ -37,7 +38,7 @@ A curated collection of the best high-quality plugins compiled for the Nuvio str
 | 🎬 VidLink | 🏴󠁧󠁢󠁥󠁮󠁧󠁿 | Shows & Movies | 1080p / 720p
 
 
-**Total Number of Plugins**: **19**
+**Total Number of Plugins**: **20**
 
 ## Disclaimer
 **No content is hosted by this repository.**
