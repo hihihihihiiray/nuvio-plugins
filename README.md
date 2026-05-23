@@ -1,6 +1,6 @@
 # Ray's Plugins
 
-A curated collection of the best high-quality plugins compiled for the Nuvio streaming application. These plugins allow you to fetch premium streams from various sources directly within the app.
+A curated collection of the best plugins compiled for the Nuvio streaming application. These plugins allow you to fetch premium streams from various sources directly within the app.
 
 ## Installation
 
@@ -8,7 +8,7 @@ A curated collection of the best high-quality plugins compiled for the Nuvio str
 2. Go to **Settings → Plugins → Click on "Add new repository"**
 3. Paste this URL:
    ```
-   https://raw.githubusercontent.com/hihihihihiiray/plugins/refs/heads/main
+   https://raw.githubusercontent.com/hihihihihiiray/nuvio-plugins/refs/heads/main/manifest.json
    ```
 4. Enable the plugins you want to use
 
@@ -50,7 +50,7 @@ A curated collection of the best high-quality plugins compiled for the Nuvio str
 - For DMCA concerns, contact the actual content hosts.
 
 
-This repository is a personal collection of public plugins made by other people for my own use, and is strictly for **educational purposes only**. I am in no way affiliated with Nuvio or any of the listed providers.
+This repository is a personal collection of public plugins made by me and others for public use, and is strictly for **educational purposes only**. I am in no way affiliated with Nuvio or any of the listed providers.
 
 
 ## Credits
