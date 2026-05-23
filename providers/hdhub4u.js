@@ -68,19 +68,16 @@ var import_cheerio_without_node_native2 = __toESM(require("cheerio-without-node-
 var TMDB_API_KEY = "1c29a5198ee1854bd5eb45dbe8d17d92";
 var TMDB_BASE_URL = "https://api.themoviedb.org/3";
 var MAIN_URL = "https://new1.hdhub4u.limo";
-var SEARCH_DOMAIN = "https://search.hdhub4u.glass"; 
 var DOMAINS_URL = "https://raw.githubusercontent.com/phisher98/TVVVV/refs/heads/main/domains.json";
 var DOMAIN_CACHE_TTL = 4 * 60 * 60 * 1e3;
 var HEADERS = {
-  "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36",
+  "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36 Edg/131.0.0.0",
   "Cookie": "xla=s4t",
-  "Referer": `${MAIN_URL}/`,
-  "Origin": MAIN_URL
+  "Referer": `${MAIN_URL}/`
 };
 function updateMainUrl(url) {
   MAIN_URL = url;
   HEADERS.Referer = `${url}/`;
-  HEADERS.Origin = url;
 }
 
 // src/hdhub4u/utils.js
@@ -495,9 +492,13 @@ function hubCloudExtractor(url, referer) {
         const link = $(element).attr("href");
         const text = $(element).text().toLowerCase();
         const fileName = header || headerDetails || "Unknown";
-        if (text.includes("download file") || text.includes("fsl server") || text.includes("s3 server") || text.includes("fslv2") || text.includes("mega server")) {
+        if (text.includes("download file") || text.includes("fsl server") || text.includes("s3 server") || text.includes("fslv2") || text.includes("mega server") || link && link.includes("r2.dev")) {
           let label = "HubCloud";
-          if (text.includes("fsl server"))
+          if (link && link.includes("r2.dev"))
+            label = "Direct R2";
+          else if (link && link.includes("workers.dev"))
+            label = "ZipDisk Server";
+          else if (text.includes("fsl server"))
             label = "HubCloud - FSL";
           else if (text.includes("s3 server"))
             label = "HubCloud - S3";
@@ -518,16 +519,21 @@ function hubCloudExtractor(url, referer) {
             }
           } catch (e) {
           }
-        } else if (text.includes("10gbps")) {
-          try {
-            const resp = yield fetch(link, { method: "GET", redirect: "manual" });
-            const loc = resp.headers.get("location");
-            if (loc && loc.includes("link=")) {
-              const dlink = loc.substring(loc.indexOf("link=") + 5);
-              links.push({ source: `HubCloud - 10Gbps ${labelExtras}`, quality, url: dlink, size: sizeInBytes, fileName });
+        } else if (text.includes("10gbps") || link && link.includes("hubcloud.cx")) {
+          let targetUrl = link;
+          if (link && !link.includes("hubcloud.cx")) {
+            try {
+              const resp = yield fetch(link, { method: "GET", redirect: "manual" });
+              const loc = resp.headers.get("location");
+              if (loc && loc.includes("link=")) {
+                targetUrl = loc.substring(loc.indexOf("link=") + 5);
+              }
+            } catch (e) {
             }
-          } catch (e) {
           }
+          links.push({ source: `HubCloud - 10Gbps ${labelExtras}`, quality, url: targetUrl, size: sizeInBytes, fileName });
+        } else if (text.includes("zipdisk") || link && link.includes("workers.dev")) {
+          links.push({ source: `ZipDisk Server ${labelExtras}`, quality, url: link, size: sizeInBytes, fileName });
         } else if (link && link.includes("pixeldra")) {
           const results = yield pixelDrainExtractor(link);
           links.push(...results.map((l) => __spreadProps(__spreadValues({}, l), { source: `${l.source} ${labelExtras}`, size: sizeInBytes, fileName })));
@@ -544,20 +550,51 @@ function hubCloudExtractor(url, referer) {
 }
 function hubCdnExtractor(url, referer) {
   return __async(this, null, function* () {
-    var _a, _b;
     try {
       const response = yield fetch(url, { headers: __spreadProps(__spreadValues({}, HEADERS), { Referer: referer }) });
       const data = yield response.text();
-      const encoded = (_a = data.match(/r=([A-Za-z0-9+/=]+)/)) == null ? void 0 : _a[1];
-      if (encoded) {
-        const m3u8Link = atob(encoded).substring(atob(encoded).lastIndexOf("link=") + 5);
-        return [{ source: "HubCdn", quality: 1080, url: m3u8Link }];
+      const $ = import_cheerio_without_node_native.default.load(data);
+      let scriptContent = "";
+      $("script").each((i, el) => {
+        const html = $(el).html();
+        if (html && html.includes("reurl")) {
+          scriptContent = html;
+        }
+      });
+      if (scriptContent) {
+        const match = scriptContent.match(/reurl\s*=\s*["']([^"']+)["']/);
+        if (match && match[1]) {
+          const reurlVal = match[1];
+          if (reurlVal.includes("?r=")) {
+            const queryPart = reurlVal.split("?r=").pop();
+            try {
+              const decoded = atob(queryPart);
+              const m3u8Link = decoded.substring(decoded.lastIndexOf("link=") + 5);
+              if (m3u8Link && m3u8Link.startsWith("http")) {
+                return [{ source: "HubCdn", quality: 1080, url: m3u8Link }];
+              }
+            } catch (e) {
+            }
+          } else if (reurlVal.includes("link=")) {
+            const m3u8Link = reurlVal.split("link=").pop();
+            if (m3u8Link && m3u8Link.startsWith("http")) {
+              return [{ source: "HubCdn", quality: 1080, url: m3u8Link }];
+            }
+          } else if (reurlVal.startsWith("http")) {
+            return [{ source: "HubCdn", quality: 1080, url: reurlVal }];
+          }
+        }
       }
-      const scriptEncoded = (_b = data.match(/reurl\s*=\s*["']([^"']+)["']/)) == null ? void 0 : _b[1];
-      if (scriptEncoded) {
-        const queryPart = scriptEncoded.split("?r=").pop();
-        const m3u8Link = atob(queryPart).substring(atob(queryPart).lastIndexOf("link=") + 5);
-        return [{ source: "HubCdn", quality: 1080, url: m3u8Link }];
+      const encodedMatch = data.match(/r=([A-Za-z0-9+/=]+)/);
+      if (encodedMatch && encodedMatch[1]) {
+        try {
+          const decoded = atob(encodedMatch[1]);
+          const m3u8Link = decoded.substring(decoded.lastIndexOf("link=") + 5);
+          if (m3u8Link && m3u8Link.startsWith("http")) {
+            return [{ source: "HubCdn", quality: 1080, url: m3u8Link }];
+          }
+        } catch (e) {
+        }
       }
       return [];
     } catch (e) {
@@ -608,16 +645,8 @@ function loadExtractor(_0) {
 function search(query) {
   return __async(this, null, function* () {
     const today = (/* @__PURE__ */ new Date()).toISOString().split("T")[0];
-    
-
-    const searchUrl = `${SEARCH_DOMAIN}/collections/post/documents/search?q=${encodeURIComponent(query)}&query_by=post_title,category&query_by_weights=4,2&sort_by=sort_by_date:desc&limit=15&highlight_fields=none&use_cache=true&page=1&analytics_tag=${today}`;
-    
-    const response = yield fetch(searchUrl, { 
-      headers: __spreadProps(__spreadValues({}, HEADERS), {
-        "Accept": "application/json",
-        "x-typesense-api-key": "6mZ6u978A6987B654321"
-    });
-    
+    const searchUrl = `https://search.hdhub4u.glass/collections/post/documents/search?q=${encodeURIComponent(query)}&query_by=post_title,category&query_by_weights=4,2&sort_by=sort_by_date:desc&limit=15&highlight_fields=none&use_cache=true&page=1&analytics_tag=${today}`;
+    const response = yield fetch(searchUrl, { headers: HEADERS });
     const data = yield response.json();
     if (!data || !data.hits)
       return [];
@@ -642,6 +671,15 @@ function search(query) {
 function getDownloadLinks(mediaUrl) {
   return __async(this, null, function* () {
     const domain = yield getCurrentDomain();
+    if (mediaUrl.includes("hdhub4u.")) {
+      try {
+        const urlObj = new URL(mediaUrl);
+        const domainObj = new URL(domain);
+        urlObj.hostname = domainObj.hostname;
+        mediaUrl = urlObj.toString();
+      } catch (e) {
+      }
+    }
     const response = yield fetch(mediaUrl, { headers: __spreadProps(__spreadValues({}, HEADERS), { Referer: `${domain}/` }) });
     const data = yield response.text();
     const $ = import_cheerio_without_node_native2.default.load(data);
@@ -792,7 +830,7 @@ function getStreams(tmdbId, mediaType = "movie", season = null, episode = null) 
           url: link.url,
           quality: qualityStr,
           size: formatBytes(link.size),
-          headers: HEADERS,
+          headers: link.headers || void 0,
           provider: "hdhub4u"
         };
       });
