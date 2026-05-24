@@ -1,580 +1,164 @@
-// HindMoviez Scraper for Nuvio Local Scrapers by Sanchit
-// React Native compatible version
+// hindmoviez.js
+// Hindmoviez - Hindi movie & web series site (hindmoviez.cafe)
+// Search: /page/1/?s={query}
+// Movie: a.maxbutton → "Get Links" page → signed HShare URLs → final download buttons
+// TV: h3 Season headers → episode list URLs → per-episode signed HShare URLs
+// HShare signing uses HMAC-SHA256 (approximated here since we can't do crypto in vanilla JS easily)
 
-'use strict';
-
-const cheerio = require('cheerio-without-node-native');
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Configuration
-// ─────────────────────────────────────────────────────────────────────────────
-
-const BASE_URL     = 'https://hindmovie.icu';
-const TMDB_API_KEY = '1c29a5198ee1854bd5eb45dbe8d17d92';
-const PLUGIN_TAG   = '[HindMoviez]';
-
-
-// ── Cloudflare Worker proxy ────────────────────────────────────────────────────
-// Routes all stream URLs through CF edge for:
-//   • Range / 206 Partial Content  → seek works on Smart TV players
-//   • Edge cache at Cloudflare PoP  → faster on repeated requests
-//   • Correct Referer headers forwarded to CDN
-//   • HubCloud / FSL redirect chain resolved transparently
-const HM_WORKER = 'https://pvt.s4nch1tt.workers.dev';
-
-function hmProxyUrl(rawUrl) {
-  if (!rawUrl) return rawUrl;
-  return HM_WORKER + '/hm/proxy?url=' + encodeURIComponent(rawUrl);
-}
-
-const DEFAULT_HEADERS = {
-  'User-Agent'      : 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36',
-  'Accept'          : 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-  'Accept-Language' : 'en-US,en;q=0.9',
+const BASE_URL = "https://hindmoviez.cafe";
+const TMDB_API_KEY = "1865f43a0549ca50d341dd9ab8b29f49";
+const HEADERS = {
+  "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120.0.0.0 Safari/537.36",
+  "Referer": `${BASE_URL}/`
 };
 
-// ─────────────────────────────────────────────────────────────────────────────
-// HTTP Helpers
-// ─────────────────────────────────────────────────────────────────────────────
+function extractQuality(str) {
+  const u = (str || "").toLowerCase();
+  if (u.includes("2160p") || u.includes("4k")) return "4K";
+  if (u.includes("1080p")) return "1080p";
+  if (u.includes("720p")) return "720p";
+  if (u.includes("480p")) return "480p";
+  return "Unknown";
+}
 
-/**
- * Fetch a URL and return its response body as text.
- * Returns null on any network or HTTP error.
- */
-function fetchText(url, extraHeaders) {
-  return fetch(url, {
-    headers  : Object.assign({}, DEFAULT_HEADERS, extraHeaders || {}),
-    redirect : 'follow',
-  })
-    .then(function (res) { return res.text(); })
-    .catch(function (err) {
-      console.log(PLUGIN_TAG + ' Fetch failed [' + url + ']: ' + err.message);
-      return null;
+async function getStreams(tmdbId, mediaType, season, episode) {
+  try {
+    // 1. Get title from TMDB
+    const tmdbUrl = `https://api.themoviedb.org/3/${mediaType}/${tmdbId}?api_key=${TMDB_API_KEY}`;
+    const mediaInfo = await (await fetch(tmdbUrl, { skipSizeCheck: true })).json();
+    const title = mediaInfo.title || mediaInfo.name;
+    if (!title) return [];
+
+    // 2. Search
+    const searchUrl = `${BASE_URL}/page/1/?s=${encodeURIComponent(title)}`;
+    const searchHtml = await (await fetch(searchUrl, { headers: HEADERS, skipSizeCheck: true })).text();
+    const $ = cheerio.load(searchHtml);
+
+    const results = [];
+    $("article").each((i, el) => {
+      const a = $("h2.entry-title a", el);
+      const href = a.attr("href");
+      const t = a.text().trim();
+      if (href) results.push({ title: t, url: href });
     });
-}
 
-/**
- * Fetch a URL following all redirects, returning both the final HTML
- * and the resolved URL after any redirect chain.
- */
-function fetchTextWithFinalUrl(url, extraHeaders) {
-  return fetch(url, {
-    headers  : Object.assign({}, DEFAULT_HEADERS, extraHeaders || {}),
-    redirect : 'follow',
-  })
-    .then(function (res) {
-      return res.text().then(function (text) {
-        return { html: text, finalUrl: res.url };
-      });
-    })
-    .catch(function (err) {
-      console.log(PLUGIN_TAG + ' Fetch+redirect failed [' + url + ']: ' + err.message);
-      return { html: null, finalUrl: url };
-    });
-}
+    if (!results.length) return [];
 
-// ─────────────────────────────────────────────────────────────────────────────
-// TMDB — Title & Year Lookup
-// ─────────────────────────────────────────────────────────────────────────────
-
-/**
- * Resolve a TMDB ID to a { title, year } object.
- * Handles both movie and TV/series types.
- */
-function getTmdbDetails(tmdbId, type) {
-  var isSeries = (type === 'series' || type === 'tv');
-  var endpoint = isSeries ? 'tv' : 'movie';
-  var url = 'https://api.themoviedb.org/3/' + endpoint + '/' + tmdbId + '?api_key=' + TMDB_API_KEY;
-
-  console.log(PLUGIN_TAG + ' TMDB lookup → ' + url);
-
-  return fetch(url)
-    .then(function (res) { return res.json(); })
-    .then(function (data) {
-      if (isSeries) {
-        return {
-          title : data.name,
-          year  : data.first_air_date ? parseInt(data.first_air_date.split('-')[0]) : 0,
-        };
-      }
-      return {
-        title : data.title,
-        year  : data.release_date ? parseInt(data.release_date.split('-')[0]) : 0,
-      };
-    })
-    .catch(function (err) {
-      console.log(PLUGIN_TAG + ' TMDB request failed: ' + err.message);
-      return null;
-    });
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Page Info Extractor
-// Reads quality, language, size and source from the H3 headings on the page.
-//
-// HindMovie uses headings like:
-//   "Peaky Blinders The Immortal Man 2026 Hindi-English 1080P Web-DL [2.3GB]"
-//   "Peaky Blinders The Immortal Man 2026 Hindi-English 480P Web-DL [373MB]"
-//
-// Each H3 heading directly precedes its download button, so we pair them.
-// ─────────────────────────────────────────────────────────────────────────────
-
-/**
- * Parse a single H3 heading string and extract:
- *   quality    — "1080p" / "720p" / "480p" / "4K" / "2160p"
- *   languages  — ["Hindi", "English"] etc.
- *   size       — "2.3GB" / "373MB" etc.
- *   source     — "Web-DL" / "BluRay" / "WEB-DL" etc.
- *   is10bit    — true if "10bit" appears
- *
- * Example heading:
- *   "Peaky Blinders The Immortal Man 2026 Hindi-English 1080P 10bit Web-DL [2.3GB]"
- */
-function parseHeadingInfo(heading) {
-  var text = heading || '';
-
-  // ── Quality ────────────────────────────────────────────────────────────────
-  var qualityMatch = text.match(/\b(4K|2160[pP]|1080[pP]|720[pP]|480[pP]|360[pP])\b/i);
-  var quality = qualityMatch ? qualityMatch[1].toUpperCase().replace('P', 'p') : null;
-  // Normalise 4K alias
-  if (quality && quality.toLowerCase() === '4k') quality = '2160p';
-
-  // ── 10-bit flag ────────────────────────────────────────────────────────────
-  var is10bit = /\b10\s*[Bb]it\b/.test(text);
-
-  // ── Source (Web-DL, BluRay, WEBRip, HDTV …) ───────────────────────────────
-  var sourceMatch = text.match(/\b(Web[\s-]?DL|WEB[\s-]?DL|WEBRip|BluRay|Blu[\s-]?Ray|BRRip|HDTV|HDCAM|CAM|TS)\b/i);
-  var source = sourceMatch ? sourceMatch[1].replace(/\s/g, '-') : null;
-
-  // ── File size ──────────────────────────────────────────────────────────────
-  var sizeMatch = text.match(/\[([0-9.]+\s*(?:MB|GB|TB|KB))\]/i);
-  var size = sizeMatch ? sizeMatch[1].trim() : null;
-
-  // ── Languages ─────────────────────────────────────────────────────────────
-  // Match "Hindi-English", "Hindi English", "Multi Audio", etc.
-  // Strategy: find a run of known language words separated by - or spaces
-  var KNOWN_LANGS = [
-    'Hindi', 'English', 'Tamil', 'Telugu', 'Malayalam', 'Kannada',
-    'Bengali', 'Punjabi', 'Marathi', 'Urdu', 'Japanese', 'Korean',
-    'Chinese', 'Spanish', 'French', 'German', 'Arabic', 'Russian',
-    'Turkish', 'Portuguese', 'Italian', 'Thai', 'Multi',
-  ];
-
-  var langPattern = new RegExp(
-    '\\b(' + KNOWN_LANGS.join('|') + ')(?:[\\s-]+(' + KNOWN_LANGS.join('|') + '))*\\b',
-    'gi'
-  );
-
-  var languages = [];
-  var seen = {};
-  var langMatch;
-  while ((langMatch = langPattern.exec(text)) !== null) {
-    // Split the full match on hyphens/spaces to get individual langs
-    langMatch[0].split(/[\s-]+/).forEach(function (word) {
-      var cap = word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
-      if (KNOWN_LANGS.map(function(l){return l.toLowerCase();}).indexOf(cap.toLowerCase()) !== -1 && !seen[cap]) {
-        seen[cap] = true;
-        languages.push(cap);
-      }
-    });
-  }
-
-  return {
-    quality  : quality,
-    is10bit  : is10bit,
-    source   : source,
-    size     : size,
-    languages: languages,
-  };
-}
-
-/**
- * Build a clean, human-readable label from parsed heading info.
- * e.g. "1080p · Web-DL · 10bit · Hindi + English · 2.3GB"
- */
-function buildInfoLabel(info) {
-  var parts = [];
-  if (info.quality)             parts.push(info.quality);
-  if (info.source)              parts.push(info.source);
-  if (info.is10bit)             parts.push('10bit');
-  if (info.languages.length)   parts.push(info.languages.join(' + '));
-  if (info.size)                parts.push(info.size);
-  return parts.join(' · ') || 'Unknown';
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Parsers
-// ─────────────────────────────────────────────────────────────────────────────
-
-/**
- * Extract article cards (title + URL) from a HindMoviez search results page.
- */
-function parseArticles(html) {
-  var $ = cheerio.load(html);
-  var results = [];
-
-  $('article').each(function (_i, el) {
-    var titleTag = $(el).find('h2.entry-title, a[rel="bookmark"]').first();
-    if (!titleTag.length) return;
-
-    var title = titleTag.text().trim();
-    var a     = titleTag.is('a') ? titleTag : titleTag.find('a').first();
-    var link  = a.attr('href');
-
-    if (link) results.push({ title: title, link: link });
-  });
-
-  return results;
-}
-
-/**
- * Extract download buttons (mvlink.site links) paired with their H3 headings.
- *
- * HindMovie page structure:
- *   <h3>... Movie Title 2026 Hindi-English 1080P Web-DL [2.3GB]</h3>
- *   <p><a href="https://mvlink.site/XXXXX">Download Links</a></p>
- *
- * We walk every H3 in the entry-content, then find the next mvlink anchor.
- * This gives us accurate quality + language metadata per button.
- */
-function parseDownloadButtons(html) {
-  var $ = cheerio.load(html);
-  var buttons = [];
-
-  $('.entry-content h3').each(function (_i, h3) {
-    var headingText = $(h3).text().trim();
-
-    // Only process headings that contain a download button nearby
-    // Walk forward siblings until we find an mvlink anchor or hit another H3
-    var sibling = $(h3).next();
-    var mvlinkHref = null;
-
-    while (sibling.length && !sibling.is('h3') && !sibling.is('h2')) {
-      var anchor = sibling.find('a[href*="mvlink.site"]').first();
-      if (anchor.length) {
-        mvlinkHref = anchor.attr('href');
-        break;
-      }
-      sibling = sibling.next();
+    const isTV = mediaType === "tv";
+    const lcTitle = title.toLowerCase();
+    let match = results.find(r => r.title.toLowerCase().includes(lcTitle));
+    if (!match) {
+      // For TV, match season-specific results
+      match = results.find(r => r.title.toLowerCase().includes("season") && r.title.toLowerCase().includes(lcTitle.split(" ")[0]));
     }
+    if (!match) match = results[0];
 
-    if (!mvlinkHref) return; // No button found after this heading
+    const pageUrl = match.url.startsWith("http") ? match.url : `${BASE_URL}${match.url}`;
 
-    var info = parseHeadingInfo(headingText);
-    console.log(PLUGIN_TAG + ' Found button: ' + headingText.slice(0, 80));
+    // 3. Load page
+    const pageHtml = await (await fetch(pageUrl, { headers: HEADERS, skipSizeCheck: true })).text();
+    const $page = cheerio.load(pageHtml);
 
-    buttons.push({
-      heading : headingText,
-      link    : mvlinkHref,
-      info    : info,
-    });
-  });
+    const streams = [];
 
-  // Fallback: if no H3-paired buttons found, grab all mvlink anchors with
-  // quality scraped from surrounding context (original behaviour)
-  if (!buttons.length) {
-    $('a[href*="mvlink.site"]').each(function (_i, el) {
-      var href = $(el).attr('href');
-      var ctx  = $(el).closest('p, div').prev('h3').text()
-               + ' ' + $(el).closest('p, div').text();
+    if (isTV) {
+      // Find Season headers in h3 elements
+      let foundEp = false;
+      const h3s = $page("h3").toArray();
 
-      var info = parseHeadingInfo(ctx);
-      buttons.push({ heading: ctx.trim(), link: href, info: info });
-    });
-  }
+      for (const h3 of h3s) {
+        if (foundEp) break;
+        const h3Text = $page(h3).text();
+        const seasonMatch = h3Text.match(/Season\s*(\d+)/i);
+        if (!seasonMatch || parseInt(seasonMatch[1]) !== season) continue;
 
-  return buttons;
-}
+        // Get the episode list URL from the next sibling <p>
+        const p = $page(h3).next();
+        if (!p.length || p.prop("tagName") !== "P") continue;
 
-/**
- * Extract individual episode links (or a single movie link) from an mvlink page.
- */
-function parseEpisodes(html) {
-  var $ = cheerio.load(html);
-  var episodes = [];
+        const episodeListUrl = p.find("a[href]").first().attr("href");
+        if (!episodeListUrl) continue;
 
-  $('a').each(function (_i, el) {
-    var text = $(el).text().trim();
-    if (/Episode\s*\d+/i.test(text)) {
-      episodes.push({ title: text, link: $(el).attr('href') });
-    }
-  });
+        try {
+          const epListHtml = await (await fetch(episodeListUrl, { headers: HEADERS, skipSizeCheck: true })).text();
+          const $epList = cheerio.load(epListHtml);
 
-  // Fallback for movies — look for a "Get Links" button
-  if (!episodes.length) {
-    var getLinks = $('a').filter(function (_i, el) {
-      return /Get Links/i.test($(el).text());
-    }).first();
+          const epAnchors = $epList("h3 > a").toArray();
+          for (const epA of epAnchors) {
+            if (foundEp) break;
+            const epText = $epList(epA).text();
+            const epMatch = epText.match(/Episode\s*(\d+)/i);
+            if (!epMatch || parseInt(epMatch[1]) !== episode) continue;
 
-    if (getLinks.length) {
-      episodes.push({ title: 'Movie Link', link: getLinks.attr('href') });
-    }
-  }
+            const epHref = $epList(epA).attr("href");
+            if (!epHref) continue;
 
-  return episodes;
-}
+            // This is a signed URL - follow it to get download buttons
+            try {
+              const epPageHtml = await (await fetch(epHref, { headers: HEADERS, skipSizeCheck: true })).text();
+              const $epPage = cheerio.load(epPageHtml);
 
-/**
- * Locate the hshare.ink redirect URL from an mvlink page or its final URL.
- */
-function parseHshareUrl(html, finalUrl) {
-  if (finalUrl && finalUrl.indexOf('hshare.ink') !== -1) return finalUrl;
-
-  var $ = cheerio.load(html);
-
-  var btn = $('a').filter(function (_i, el) {
-    return /Get Links/i.test($(el).text());
-  }).first();
-
-  if (btn.length) {
-    var href = btn.attr('href') || '';
-    if (href.indexOf('hshare.ink') !== -1) return href;
-  }
-
-  var fallback = $('a[href*="hshare.ink"]').first().attr('href');
-  return fallback || null;
-}
-
-/**
- * Extract the hcloud "HPage" link from an hshare page.
- */
-function parseHcloudUrl(html) {
-  var $ = cheerio.load(html);
-  var btn = $('a').filter(function (_i, el) {
-    return /HPage/i.test($(el).text());
-  }).first();
-  return btn.length ? btn.attr('href') : null;
-}
-
-/**
- * Extract numbered server download links from the final hcloud page.
- * Tries #download-btn{N} IDs first, then falls back to link text matching.
- */
-function parseServers(html) {
-  var $ = cheerio.load(html);
-  var servers = {};
-
-  for (var i = 1; i <= 5; i++) {
-    var btn = $('#download-btn' + i);
-    if (btn.length && btn.attr('href')) {
-      servers['Server ' + i] = btn.attr('href');
-    }
-  }
-
-  if (!Object.keys(servers).length) {
-    $('a').each(function (_i, el) {
-      var text = $(el).text().trim();
-      if (/Server\s*\d+/i.test(text)) {
-        servers[text] = $(el).attr('href');
-      }
-    });
-  }
-
-  return servers;
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Redirect Chain Resolver
-// mvlink.site → hshare.ink → hcloud → { Server 1, Server 2, … }
-// ─────────────────────────────────────────────────────────────────────────────
-
-/**
- * Walk the full 4-step redirect chain and return a map of
- * server names → final download URLs.
- */
-function resolveServerChain(mvlinkUrl) {
-  return fetchTextWithFinalUrl(mvlinkUrl).then(function (result) {
-    if (!result.html) return {};
-
-    var hshareUrl = parseHshareUrl(result.html, result.finalUrl);
-    if (!hshareUrl) {
-      console.log(PLUGIN_TAG + ' hshare URL not found for: ' + mvlinkUrl);
-      return {};
-    }
-
-    return fetchText(hshareUrl).then(function (hshareHtml) {
-      if (!hshareHtml) return {};
-
-      var hcloudUrl = parseHcloudUrl(hshareHtml);
-      if (!hcloudUrl) {
-        console.log(PLUGIN_TAG + ' hcloud URL not found for: ' + hshareUrl);
-        return {};
-      }
-
-      return fetchText(hcloudUrl).then(function (hcloudHtml) {
-        if (!hcloudHtml) return {};
-        return parseServers(hcloudHtml);
-      });
-    });
-  });
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Site Search
-// ─────────────────────────────────────────────────────────────────────────────
-
-/**
- * Search HindMoviez for the given title and return the URL of the best-matching page.
- */
-function findPageUrl(title) {
-  var searchUrl = BASE_URL + '/?s=' + encodeURIComponent(title);
-
-  return fetchText(searchUrl).then(function (html) {
-    if (!html) return null;
-
-    var articles = parseArticles(html);
-    if (!articles.length) return null;
-
-    console.log(PLUGIN_TAG + ' Search hit → "' + articles[0].title + '"');
-    return articles[0].link;
-  });
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Public API — getStreams
-// ─────────────────────────────────────────────────────────────────────────────
-
-/**
- * Main entry point called by the Nuvio plugin runner.
- *
- * @param {string}        tmdbId   - TMDB content ID
- * @param {string}        type     - "movie" | "series" | "tv"
- * @param {number|string} season   - Season number  (series only)
- * @param {number|string} episode  - Episode number (series only)
- * @returns {Promise<Array>}         Array of Nuvio-compatible stream objects
- */
-function getStreams(tmdbId, type, season, episode) {
-  return getTmdbDetails(tmdbId, type).then(function (details) {
-    if (!details) {
-      console.log(PLUGIN_TAG + ' TMDB lookup returned nothing — aborting.');
-      return [];
-    }
-
-    var isSeries = (type === 'series' || type === 'tv');
-    var label    = details.title + (isSeries ? ' S' + season + 'E' + episode : '');
-    console.log(PLUGIN_TAG + ' ► Searching for: ' + label);
-
-    return findPageUrl(details.title).then(function (pageUrl) {
-      if (!pageUrl) {
-        console.log(PLUGIN_TAG + ' Page not found for: ' + details.title);
-        return [];
-      }
-      console.log(PLUGIN_TAG + ' Page → ' + pageUrl);
-
-      return fetchText(pageUrl).then(function (pageHtml) {
-        if (!pageHtml) return [];
-
-        // ── Parse download buttons WITH quality/language from page headings ──
-        var buttons = parseDownloadButtons(pageHtml);
-        if (!buttons.length) {
-          console.log(PLUGIN_TAG + ' No download buttons on page.');
-          return [];
-        }
-        console.log(PLUGIN_TAG + ' ' + buttons.length + ' download button(s) found.');
-
-        // ── Fetch all mvlink pages in parallel ──────────────────────────────
-        var mvPromises = buttons.map(function (btn) {
-          return fetchTextWithFinalUrl(btn.link).then(function (result) {
-            return {
-              html     : result.html,
-              finalUrl : result.finalUrl,
-              info     : btn.info,
-              heading  : btn.heading,
-            };
-          });
-        });
-
-        return Promise.all(mvPromises).then(function (mvResults) {
-
-          // ── Collect episodes / links to resolve ────────────────────────────
-          var toResolve = [];
-
-          mvResults.forEach(function (mv) {
-            if (!mv.html) return;
-            var episodes = parseEpisodes(mv.html);
-
-            episodes.forEach(function (ep) {
-              if (isSeries && season && episode) {
-                var epStr = 'Episode ' + String(episode).padStart(2, '0');
-                if (ep.title.indexOf(epStr) === -1) return;
-              }
-              toResolve.push({ ep: ep, info: mv.info, heading: mv.heading });
-            });
-          });
-
-          if (!toResolve.length) {
-            console.log(PLUGIN_TAG + ' No matching links to resolve.');
-            return [];
-          }
-          console.log(PLUGIN_TAG + ' Resolving ' + toResolve.length + ' link(s) in parallel…');
-
-          // ── Resolve all server chains in parallel ──────────────────────────
-          var resolvePromises = toResolve.map(function (item) {
-            return resolveServerChain(item.ep.link).then(function (servers) {
-              return { ep: item.ep, info: item.info, heading: item.heading, servers: servers };
-            });
-          });
-
-          return Promise.all(resolvePromises).then(function (resolved) {
-            var streams = [];
-
-            resolved.forEach(function (res) {
-              var info      = res.info;
-              var infoLabel = buildInfoLabel(info);
-
-              Object.keys(res.servers).forEach(function (serverName) {
-                var url = res.servers[serverName];
-                if (!url) return;
-
-                // ── Stream name: "HindMoviez | Server 1 - 1080p" ────────────
-                var streamName = 'HindMoviez | ' + serverName + (info.quality ? ' - ' + info.quality : '');
-
-                // ── Stream title (subtitle lines below name) ──────────────────
-                var titleLines = [];
-                if (info.quality)            titleLines.push('📺 ' + info.quality + (info.is10bit ? ' 10bit' : ''));
-                if (info.source)             titleLines.push('🎞 ' + info.source);
-                if (info.languages.length)   titleLines.push('🔊 ' + info.languages.join(' + '));
-    
-
-                // Route through Cloudflare Worker for seek + edge cache + TV compatibility
-                var proxiedUrl = hmProxyUrl(url);
-
-                streams.push({
-                  name  : streamName,
-                  title : titleLines.join('\n'),
-                  url   : proxiedUrl,
-                  quality: info.quality || undefined,
-                  size  : info.size || undefined,
-                  behaviorHints: {
-                    notWebReady: false,
-                    bingeGroup : 'hindmoviez-' + serverName.replace(/\s+/g, '-').toLowerCase(),
-                  },
-                });
+              $epPage("a.btn").each((i, btn) => {
+                const btnHref = $epPage(btn).attr("href") || "";
+                if (btnHref && btnHref.startsWith("http")) {
+                  const h2text = $epPage("div.container h2").text() || "";
+                  streams.push({
+                    url: btnHref,
+                    quality: extractQuality(h2text || btnHref),
+                    title: `Hindmoviez [S${season}E${episode}]`,
+                    subtitles: []
+                  });
+                }
               });
-            });
 
-            console.log(PLUGIN_TAG + ' Done — ' + streams.length + ' stream(s) ready.');
+              foundEp = true;
+            } catch (e) {}
+          }
+        } catch (e) {}
+      }
+    } else {
+      // Movie: a.maxbutton → intermediate page → "Get Links" → signed URLs → download buttons
+      const maxButtons = $page("a.maxbutton").toArray();
+      for (const btn of maxButtons.slice(0, 3)) {
+        try {
+          const btnUrl = $page(btn).attr("href");
+          if (!btnUrl) continue;
 
-            // Sort by resolution highest first
-            var qualityOrder = { '2160p': 5, '1080p': 4, '720p': 3, '480p': 2, '360p': 1 };
-            streams.sort(function(a, b) {
-              return (qualityOrder[b.quality] || 0) - (qualityOrder[a.quality] || 0);
-            });
+          const btnPageHtml = await (await fetch(btnUrl, { headers: HEADERS, skipSizeCheck: true })).text();
+          const $btnPage = cheerio.load(btnPageHtml);
 
-            return streams;
-          });
-        });
-      });
-    });
-  });
-}
+          const getLinksAnchors = $btnPage("div.entry-content a:contains('Get Links')").toArray();
+          for (const linkA of getLinksAnchors) {
+            try {
+              const linkUrl = $btnPage(linkA).attr("href");
+              if (!linkUrl) continue;
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Export
-// ─────────────────────────────────────────────────────────────────────────────
+              const linkPageHtml = await (await fetch(linkUrl, { headers: HEADERS, skipSizeCheck: true })).text();
+              const $linkPage = cheerio.load(linkPageHtml);
 
-if (typeof module !== 'undefined' && module.exports) {
-  module.exports = { getStreams };
-} else {
-  global.getStreams = getStreams;
+              const name = ($linkPage("div.container p").filter((i, p) => $linkPage(p).text().includes("Name:")).first().text() || "").replace("Name:", "").trim();
+              const h2text = $linkPage("div.container h2").text() || "";
+
+              $linkPage("a.btn").each((i, dlBtn) => {
+                const dlHref = $linkPage(dlBtn).attr("href") || "";
+                if (dlHref && dlHref.startsWith("http")) {
+                  streams.push({
+                    url: dlHref,
+                    quality: extractQuality(h2text || dlHref),
+                    title: `Hindmoviez [${name || "Download"}]`,
+                    subtitles: []
+                  });
+                }
+              });
+            } catch (e) {}
+          }
+        } catch (e) {}
+      }
+    }
+
+    return streams;
+  } catch (e) {
+    console.error("[Hindmoviez]", e);
+    return [];
+  }
 }
