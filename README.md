@@ -62,7 +62,7 @@ Huge thanks to these people:
 - **Sanchit**
 - **wooodyhood**
 - **KennethJYS**
-- **keyiflerolsun** (From MoOnCrOwN's Repo)
+- **keyiflerolsun**
 - **Michat88**
 - **Nvmindl**
-- **Real-Morpheus**
+- **Kabir**
