@@ -10,7 +10,7 @@ A curated collection of the best plugins compiled for the Nuvio streaming applic
    ```
    https://raw.githubusercontent.com/hihihihihiiray/nuvio-plugins/refs/heads/main/manifest.json
    ```
-4. Enable the plugins you want to use
+4. Enable or disable your desired plugins
 
 
 ## Available Plugins
@@ -54,7 +54,7 @@ This repository is a personal collection of public plugins made by me and others
 
 
 ## Credits
-Huge thanks to these people who have created these plugins:
+Huge thanks to these people:
 
 - **yoruix**
 - **D3adlyRocket**
