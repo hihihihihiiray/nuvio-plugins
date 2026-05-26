@@ -6,7 +6,7 @@ console.log('[VegaMovies] Initializing VegaMovies scraper');
 // Constants  
 const TMDB_API_KEY = "1c29a5198ee1854bd5eb45dbe8d17d92";
 const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
-const BASE_URL = 'https://vegamovies.market';
+const BASE_URL = 'https://vegamovies.mq';
 const TIMEOUT = 25000;
 
 const HEADERS = {
