@@ -178,7 +178,7 @@
       "author": "Nuvio Team",
       "supportedTypes": ["movie", "tv", "anime"],
       "filename": "providers/showbox.js",
-      "enabled": false,
+      "enabled": true,
       "formats": ["mp4", "mkv"],
       "logo": "https://files.catbox.moe/4mdxz9.jpeg",
       "contentLanguage": ["en"]
