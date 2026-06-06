@@ -17,15 +17,15 @@ const HEADERS = {
 
 // Server configurations
 const SERVERS = {
-    'Neon': { url: 'https://api.videasy.net/myflixerzupcloud/sources-with-title', language: 'Original' },
-    'Yoru': { url: 'https://api.videasy.net/cdn/sources-with-title', language: 'Original', moviesOnly: true },
-    'Sage': { url: 'https://api.videasy.net/1movies/sources-with-title', language: 'Original' },
-    'Breach': { url: 'https://api.videasy.net/m4uhd/sources-with-title', language: 'Original' },
-    'Killjoy': { url: 'https://api.videasy.net/meine/sources-with-title?language=german', language: 'German' },
-    'Harbor': { url: 'https://api.videasy.net/meine/sources-with-title?language=italian', language: 'Italian' },
-    'Chamber': { url: 'https://api.videasy.net/meine/sources-with-title?language=french', language: 'French', moviesOnly: true },
-    'Omen': { url: 'https://api.videasy.net/lamovie/sources-with-title', language: 'Spanish' },
-    'Raze': { url: 'https://api.videasy.net/superflix/sources-with-title', language: 'Portuguese' },
+    'Neon': { url: 'https://api.videasy.to/myflixerzupcloud/sources-with-title', language: 'Original' },
+    'Yoru': { url: 'https://api.videasy.to/cdn/sources-with-title', language: 'Original', moviesOnly: true },
+    'Sage': { url: 'https://api.videasy.to/1movies/sources-with-title', language: 'Original' },
+    'Breach': { url: 'https://api.videasy.to/m4uhd/sources-with-title', language: 'Original' },
+    'Killjoy': { url: 'https://api.videasy.to/meine/sources-with-title?language=german', language: 'German' },
+    'Harbor': { url: 'https://api.videasy.to/meine/sources-with-title?language=italian', language: 'Italian' },
+    'Chamber': { url: 'https://api.videasy.to/meine/sources-with-title?language=french', language: 'French', moviesOnly: true },
+    'Omen': { url: 'https://api.videasy.to/lamovie/sources-with-title', language: 'Spanish' },
+    'Raze': { url: 'https://api.videasy.to/superflix/sources-with-title', language: 'Portuguese' },
 
 };
 
