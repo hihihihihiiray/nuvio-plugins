@@ -257,7 +257,7 @@ function extractStreamsFromEpisode(episodeUrl) {
   });
 }
 
-// ===== P.A.C.K.E.R UNPACKER (ported from original) =====
+// ===== P.A.C.K.E.R UNPACKER =====
 
 function Unbaser(base) {
   this.ALPHABET = {
@@ -396,4 +396,5 @@ function getStreams(tmdbId, mediaType, season, episode) {
   });
 }
 
+// Export the main function
 module.exports = { getStreams: getStreams };
