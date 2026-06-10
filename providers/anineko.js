@@ -381,7 +381,6 @@ function getStreams(tmdbId, mediaType, season, episode) {
             name: PROVIDER_NAME + " [" + s.serverName + "] " + s.label + " - HD",
             title: s.serverName + " (" + s.label + ") 1080p",
             url: s.streamUrl,
-            quality: "Auto",
             headers: {
               "User-Agent": DEFAULT_HEADERS["User-Agent"],
               "Referer": BASE_URL + "/"
