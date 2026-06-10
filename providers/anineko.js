@@ -1,6 +1,6 @@
 /**
- * AniNeko Provider for Nuvio
- * Scrapes from https://anineko.to
+ * AniNeko Provider for Nuvio Plugins
+ * Scrapes from anineko.to
  */
 
 var PROVIDER_NAME = "AniNeko";
