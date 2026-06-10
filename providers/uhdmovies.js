@@ -5,7 +5,7 @@
 "use strict";
 var cheerio = require("cheerio-without-node-native");
 
-var DOMAIN = "https://uhdmovies.rodeo";
+var DOMAIN = "https://uhdmovies.food";
 var DOMAINS_URL = "https://raw.githubusercontent.com/phisher98/TVVVV/refs/heads/main/domains.json";
 var DOMAIN_CACHE = { url: DOMAIN, ts: 0 };
 
