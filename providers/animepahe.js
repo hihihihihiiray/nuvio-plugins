@@ -78,7 +78,7 @@ var __async = (__this, __arguments, generator) => {
 var import_cheerio_without_node_native = __toESM(require("cheerio-without-node-native"));
 
 // src/animepahe/constants.js
-var MAIN_URL = "https://animepahe.com";
+var MAIN_URL = "https://animepahe.pw";
 var PROXY_URL = "https://animepaheproxy.phisheranimepahe.workers.dev/?url=";
 var HEADERS = {
   "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/147.0.0.0 Safari/537.36",
