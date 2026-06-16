@@ -223,19 +223,6 @@
       "contentLanguage": ["en"]
     },
     {
-      "id": "nuvio-vegamovies",
-      "name": "VegaMovies",
-      "description": "VegaMovies streaming with high-quality direct links (~6s)",
-      "version": "1.1",
-      "author": "raymondnoodles",
-      "supportedTypes": ["movie", "tv"],
-      "filename": "providers/vegamovies.js",
-      "enabled": true,
-      "formats": ["mp4", "mkv"],
-      "logo": "https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=http://vegamovies.market&size=256",
-      "contentLanguage": ["en", "hi"]
-    },
-    {
       "id": "nuvio-videasy",
       "name": "VidEasy",
       "description": "VidEasy streaming with multiple server support (~6s)",
