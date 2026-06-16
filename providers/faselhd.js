@@ -23,7 +23,7 @@ var __async = (__this, __arguments, generator) => {
 };
 
 // src/faselhd/index.js
-var BACKEND_BASE = "https://nvmindl.duckdns.org";
+var BACKEND_BASE = "http://145.241.158.129:3112";
 var UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36";
 var FETCH_TIMEOUT = 12e3;
 function safeFetch(url, options, timeout) {
