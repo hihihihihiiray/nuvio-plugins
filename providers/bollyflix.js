@@ -6,7 +6,7 @@
 var cheerio = require("cheerio-without-node-native");
 
 var PROVIDER_NAME = "BollyFlix";
-var BASE_URL = "https://bollyflix.med";
+var BASE_URL = "https://bollyflix.at";
 var TMDB_API_KEY = "1c29a5198ee1854bd5eb45dbe8d17d92";
 
 var DEFAULT_HEADERS = {
