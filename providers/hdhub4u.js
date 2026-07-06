@@ -67,7 +67,7 @@ var import_cheerio_without_node_native2 = __toESM(require("cheerio-without-node-
 // src/hdhub4u/constants.js
 var TMDB_API_KEY = "1c29a5198ee1854bd5eb45dbe8d17d92";
 var TMDB_BASE_URL = "https://api.themoviedb.org/3";
-var MAIN_URL = "https://new1.hdhub4u.cl";
+var MAIN_URL = "https://new2.hdhub4u.cl";
 var DOMAINS_URL = "https://raw.githubusercontent.com/phisher98/TVVVV/refs/heads/main/domains.json";
 var DOMAIN_CACHE_TTL = 4 * 60 * 60 * 1e3;
 var HEADERS = {
