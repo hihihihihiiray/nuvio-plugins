@@ -17,6 +17,7 @@ A curated collection of the best plugins compiled for the Nuvio streaming applic
 | Provider | Language | Content | Quality
 | --- | --- | --- | --- |
 | [![4khdhub.png](https://i.postimg.cc/Z5B7RF79/4khdhub.png)](https://postimg.cc/21YF9vfm) 4KHDHub | 🏴󠁧󠁢󠁥󠁮󠁧󠁿 🇮🇳 | Shows & Movies | 4K / 1080p / 720p
+| 🎬 Airflix | 🏴󠁧󠁢󠁥󠁮󠁧󠁿 | Shows & Movies | 1080p / 720p
 | [![dfb4smC5](https://ruayamo.s-ul.eu/dfb4smC5)](https://postimg.cc/QBbHSrdv) AnimePahe | 🏴󠁧󠁢󠁥󠁮󠁧󠁿 🇯🇵 | Anime (Shows & Movies) | 1080p / 720p
 | [![IMG-0639.jpg](https://i.postimg.cc/FzGgkp2F/IMG-0639.jpg)](https://postimg.cc/0KMJLYkh) AniNeko | 🏴󠁧󠁢󠁥󠁮󠁧󠁿 🇯🇵 | Anime (Shows & Movies) | 1080p / 720p
 | [![bdgAJi9w](https://ruayamo.s-ul.eu/bdgAJi9w)](https://postimg.cc/bD8wRQQ1) BollyFlix | 🏴󠁧󠁢󠁥󠁮󠁧󠁿  🇮🇳 🇯🇵 🇲🇾 🇰🇷 | Shows & Movies & Anime | 4K / 1080p / 720p
