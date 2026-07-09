@@ -16,6 +16,19 @@
       "contentLanguage": ["en", "hi"]
     },
     {
+      "id": "nuvio-airflix",
+      "name": "Airflix"
+      "description": "Airflix streaming with good quality content (~4s)",
+      "version": "1.0",
+      "author": "raymondnoodles",
+      "supportedTypes": ["movie", "tv"],
+      "filename": "providers/airflix.js",
+      "enabled": true,
+      "formats": ["m3u8"],
+      "logo": "https://files.catbox.moe/y9bg0d.jpeg",
+      "contentLanguage": ["en"]
+    },
+    {
       "id": "nuvio-animepahe",
       "name": "AnimePahe",
       "description": "AnimePahe streaming links with sub and dub support (~6s)",
