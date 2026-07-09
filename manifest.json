@@ -25,7 +25,7 @@
       "filename": "providers/animepahe.js",
       "enabled": true,
       "formats": ["m3u8"],
-      "logo": "https://i3.wp.com/animepahe.ch/wp-content/uploads/2026/03/cropped-animepahe-icon-180x180.png",
+      "logo": "https://files.catbox.moe/deot3a.png",
       "contentLanguage": ["en", "ja"]
     },
     {
@@ -193,7 +193,7 @@
       "filename": "providers/uhdmovies.js",
       "enabled": true,
       "formats": ["mkv"],
-      "logo": "https://uhdmovies.food/wp-content/uploads/2021/03/cropped-output-onlinepngtools-1-192x192.png",
+      "logo": "https://files.catbox.moe/dmc8o8.png",
       "contentLanguage": ["en"]
     },
     {
